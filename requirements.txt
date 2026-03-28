@@ -1,24 +1,8 @@
-# UI
-streamlit==1.35.0
-
-# Data
-yfinance==0.2.40
-finnhub-python==2.4.20
-pandas==2.2.2
-numpy==1.26.4
-
-# NLP
-transformers==4.41.2
-torch==2.3.0
-
-# ML Models
-scikit-learn==1.5.0
-xgboost==2.0.3
-
-# DL Model
-tensorflow==2.16.1
-
-# Utilities
-joblib==1.4.2
-python-dotenv==1.0.1
-plotly==5.22.0
+pandas
+numpy
+yfinance
+scikit-learn
+xgboost
+tensorflow
+joblib
+matplotlib

@@ -63,11 +63,6 @@ Time-based split (no shuffling):
 | XGBoost | Gradient Boosting | Best for tabular data, nonlinear patterns |
 | LSTM | Deep Learning | Temporal sequence memory (5-day window) |
 
-### Ensemble
-```
-P(UP) = 0.20 × LR + 0.50 × XGB + 0.30 × LSTM
-```
-
 ---
 
 ## Results
@@ -119,10 +114,7 @@ nifty-gap-prediction/
 │   │   └── ensemble.py
 │   └── utils/
 │       └── features.py            # dataset loader + train/test split
-├── .streamlit/
-│   └── config.toml
-├── app.py                         # Streamlit UI
-├── train.py                       # standalone training script
+├── train.py                       # training script
 ├── visualize.py                   # generates figures
 └── requirements.txt
 ```
