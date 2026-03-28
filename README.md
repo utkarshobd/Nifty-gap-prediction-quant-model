@@ -1,72 +1,103 @@
-# Prediction Point 📈
-> Stock Gap-Up / Gap-Down prediction using FinBERT + Random Forest + XGBoost + LSTM
+# Prediction Point
+
+> Multi-Factor NIFTY Gap Prediction using ML and Deep Learning
+
+Predicts whether **NIFTY 50 will gap up or gap down** at next market open using global index signals.
+
+## Pipeline
+
+```
+Dataset (CSV) → Time-based Split → Train 3 Models → Compare → Ensemble Prediction
+```
+
+### Step 1 — Dataset
+Pre-built dataset: `data/nifty_gap_dataset_v2.csv`
+- NIFTY 50 daily data from 2015 to 2026
+- 2,394 rows after cleaning
+
+| Feature | What it represents | Shift |
+|---|---|---|
+| SP500 % | Global sentiment | shift(1) |
+| Nasdaq % | Tech / risk appetite | shift(1) |
+| Nikkei % | Asia sentiment | shift(1) |
+| HangSeng % | Asia sentiment | shift(1) |
+| NIFTY Prev % | Local momentum | — |
+| Volatility | 5-day rolling std of NIFTY returns | — |
+| Target | 1 = Gap Up, 0 = Gap Down | — |
+
+All external indices use `shift(1)` — dataset index is NIFTY dates, so previous trading day's close is used to avoid calendar mismatch and data leakage.
+
+### Step 2 — Train-Test Split
+Time-based 80/20 split (no shuffling, no leakage):
+- Train: 2015 → ~2022
+- Test:  ~2022 → 2026
+
+### Step 3 — Models
+
+| Model | Type | Why |
+|---|---|---|
+| Logistic Regression | Linear baseline | Interpretable, fast |
+| XGBoost | Gradient Boosting | Best for tabular data, nonlinear patterns |
+| LSTM | Deep Learning | Temporal sequence memory (5-day window) |
+
+### Step 4 — Evaluation
+- Test accuracy per model
+- Confusion matrix
+- Feature importance (XGBoost)
+
+### Step 5 — Ensemble
+```
+P(UP) = 0.20 × LR + 0.50 × XGB + 0.30 × LSTM
+```
+XGBoost weighted highest — tree-based models outperform on structured tabular data.
+
+### Expected Result
+```
+XGBoost > Logistic Regression > LSTM
+```
+Reason: Data is tabular and structured. Dataset size (~2400 rows) is too small for LSTM to learn meaningful temporal patterns.
 
 ## Tech Stack
+
 | Layer | Tool |
 |---|---|
 | UI | Streamlit |
-| NLP | FinBERT (ProsusAI/finbert) |
-| ML Model 1 | Random Forest |
+| ML Model 1 | Logistic Regression (baseline) |
 | ML Model 2 | XGBoost |
 | DL Model | LSTM (TensorFlow/Keras) |
-| Ensemble | Weighted Average (RF 25% + XGB 35% + LSTM 40%) |
-| Stock Data | yfinance |
-| News Data | Finnhub API (free tier) |
+| Ensemble | Weighted Average (LR 20% + XGB 50% + LSTM 30%) |
+| Data | yfinance (pre-downloaded) |
+
+## Project Structure
+
+```
+prediction-point/
+├── data/
+│   └── nifty_gap_dataset_v2.csv   # pre-built dataset
+├── models_saved/                  # trained models (auto-created, gitignored)
+├── scripts/
+│   └── generate_dataset.py        # one-off script to regenerate dataset
+├── src/
+│   ├── models/
+│   │   ├── logistic_model.py
+│   │   ├── xgboost_model.py
+│   │   ├── lstm_model.py
+│   │   └── ensemble.py
+│   └── utils/
+│       └── features.py            # dataset loader + train/test split
+├── .streamlit/
+│   └── config.toml
+├── app.py                         # Streamlit UI
+└── requirements.txt
+```
 
 ## Setup
 
-### 1. Install dependencies
 ```bash
 pip install -r requirements.txt
-```
-
-### 2. Get a free Finnhub API key
-- Go to https://finnhub.io → Sign up → Copy your API key
-- Edit `.env`:
-```
-FINNHUB_API_KEY=your_actual_key_here
-```
-
-### 3. Run the app
-```bash
 streamlit run app.py
 ```
 
-## How to Use
-1. Enter a stock symbol in the sidebar (e.g. `AAPL`, `TSLA`, `RELIANCE.NS`)
-2. Set training history and news lookback days
-3. Click **🚀 Run Full Pipeline**
-4. View prediction, model comparison, sentiment analysis, and price charts
+## Resume Title
 
-## Supported Symbols
-- **US stocks**: `AAPL`, `TSLA`, `GOOGL`, `MSFT`, etc.
-- **Indian stocks (NSE)**: `RELIANCE.NS`, `TCS.NS`, `INFY.NS`, `HDFCBANK.NS`, `SBIN.NS`
-
-## Project Structure
-```
-prediction-point/
-├── app.py                  # Streamlit UI (main entry point)
-├── requirements.txt
-├── .env                    # API keys (never commit this)
-├── .streamlit/
-│   └── config.toml         # Dark theme config
-├── models_saved/           # Trained model files (auto-created)
-└── src/
-    ├── data/
-    │   ├── stock_fetcher.py    # yfinance price data
-    │   └── news_fetcher.py     # Finnhub news API
-    ├── nlp/
-    │   └── sentiment.py        # FinBERT scoring
-    ├── models/
-    │   ├── random_forest.py    # ML Model 1
-    │   ├── xgboost_model.py    # ML Model 2
-    │   ├── lstm_model.py       # DL Model
-    │   └── ensemble.py         # Combines all 3
-    └── utils/
-        └── features.py         # Feature engineering
-```
-
-## Notes
-- First run downloads FinBERT model (~400MB) — subsequent runs are fast
-- Models are saved to `models_saved/` after training — no retraining needed unless you change the symbol
-- TimeSeriesSplit is used for cross-validation to prevent data leakage
+> Multi-Factor NIFTY Gap Prediction using ML and Deep Learning
