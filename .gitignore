@@ -1,0 +1,7 @@
+.env
+models_saved/
+__pycache__/
+*.pkl
+*.keras
+*.pyc
+.DS_Store
